@@ -1,6 +1,6 @@
 -- Project 2020
 -- PALINDROME
--- Team MKembers : Sriram Rakshith Kolar, Swetha Jayapath, Seika Muhmod 
+-- Team MKembers : Sriram Rakshith Kolar, Swetha Jayapath, Seika Mahmud 
 -- DESC: 
 
 
