@@ -1,7 +1,7 @@
 -- Project 2020
 -- PALINDROME
--- Team MKembers : Sriram Rakshith Kolar, Swetha Jayapath, Seika Mahmud 
--- DESC: 
+-- Team MKembers : Sriram Rakshith Kolar, Swetha Jayapathy, Seika Mahmud
+-- DESC:
 
 
 
@@ -47,6 +47,11 @@ data Expr = Lit Int
           | Ref Var
   deriving (Eq,Show)
 
+data StrExpr = Str String
+               | concatStr  StrExpr
+               | Ref Var
+  deriving (Eq,Show)
+
 -- | Boolean expressions.
 data Test = LTE Expr Expr
           | Not Test
@@ -64,10 +69,6 @@ data Stmt = Set   Var  Expr
 type Prog = ([Var], Stmt)
 
 
--- Our Progs: 
-
-
-
 -- | An example Imp program.
 euclid :: Prog
 euclid = (["a","b"], Block [a,b,loop])
@@ -81,23 +82,6 @@ euclid = (["a","b"], Block [a,b,loop])
                (LTE (Ref "a") (Ref "b"))
                (Set "b" (Add (Ref "b") (Neg (Ref "a"))))
                (Set "a" (Add (Ref "a") (Neg (Ref "b")))))
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 -- Semantic Domain:
@@ -133,3 +117,17 @@ stmt (Block ss)    = \m -> stmts ss m  -- could also use foldl
 --   Semantic domain: Store
 prog :: Prog -> Store
 prog (xs,s) = stmt s (new xs)
+
+-- 1.To sum the integers in the array and to check whether it is less than 100
+--sumLessThan ::[int] -> Bool
+--sumLessThan=undefined
+
+sumFiveOrLess' :: [Int] -> Prog
+sumFiveOrLess' is = Set A (LitI 0) : map stmt (filter (<= 5) is)
+  where
+    stmt i = Set A (Add (Get A) (LitI i))
+
+
+--2. To Concatenate the string in an array into one string
+--concatStr :: [String] -> String
+--concatStr ::
