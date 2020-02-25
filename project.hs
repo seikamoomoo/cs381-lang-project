@@ -68,6 +68,19 @@ type Prog = ([Var], Stmt)
 
 
 
+-- | An example Imp program.
+euclid :: Prog
+euclid = (["a","b"], Block [a,b,loop])
+  where
+    a = Set "a" (Lit 1071)
+    b = Set "b" (Lit 462)
+    loop = While
+             (Not (And (LTE (Ref "a") (Ref "b"))
+                       (LTE (Ref "b") (Ref "a"))))
+             (Cond
+               (LTE (Ref "a") (Ref "b"))
+               (Set "b" (Add (Ref "b") (Neg (Ref "a"))))
+               (Set "a" (Add (Ref "a") (Neg (Ref "b")))))
 
 
 
