@@ -58,10 +58,20 @@ data Stmt = Set   Var  Expr
           | Cond  Test Stmt Stmt
           | While Test Stmt
           | Block [Stmt]
+          | For Stmt Test Stmt Stmt
   deriving (Eq,Show)
 
 -- | Program.
 type Prog = ([Var], Stmt)
+
+-- | Store 
+type Store = [(Name, Int)]
+
+type Name = String
+-- Fix point funvtion for the while loops
+
+fix :: (a -> a) -> a
+fix f = let x = f x in x
 
 
 -- Our Progs: 
@@ -90,21 +100,38 @@ euclid = (["a","b"], Block [a,b,loop])
 
 
 
+-- for (i = 0, i< 10 i= i + 1)
+-- while (i < 10)
+-- i = i +1
 
+-- Desugar :: Expr -> Expr
 
+-- [(Name, Int)] :: Store
 
-
-
-
-
-
-
+-- lookup :: [(a,b)] -> a -> Maybe b
+-- get n env :: Name -> Store -> Int
+-- set n i env :: Name -> Int -> Env -> Env
 
 -- Semantic Domain:
 
 
 -- | Semantics of integer expressions.
 --   Semantic domain: Store -> Int
+
+get :: Name -> Store -> Int
+get n env = case lookup n env of
+            Just i -> i
+            Nothing -> 0
+
+
+
+set :: Name -> Int -> Store -> Store
+set n i env = (n,i):env 
+
+new :: [Var] -> Store
+new v = map (\x -> (x,0)) v
+
+
 expr :: Expr -> Store -> Int
 expr (Lit i)   = \_ -> i
 expr (Neg e)   = \m -> negate (expr e m)
