@@ -1,14 +1,14 @@
 -- Project 2020
 -- PALINDROME
--- Team MKembers : Sriram Rakshith Kolar, Swetha Jayapath, Seika Muhmod 
--- DESC: 
+-- Team MKembers : Sriram Rakshith Kolar, Swetha Jayapath, Seika Muhmod
+-- DESC:
 
 
 
 -- Syntax
 --     int  ::= (any integer)
 --
---     var  ::= (any variable name)
+--     var  ::= (any variable Var)
 --
 --     expr ::= int                      literal integers
 --           |  `-` expr                 integer negation
@@ -37,7 +37,7 @@
 
 -- Grammer:
 
--- | Variable names.
+-- | Variable Vars.
 type Var = String
 
 -- | Integer expressions.
@@ -64,17 +64,17 @@ data Stmt = Set   Var  Expr
 -- | Program.
 type Prog = ([Var], Stmt)
 
--- | Store 
-type Store = [(Name, Int)]
+-- | Store
+type Store = [(Var, Int)]
 
-type Name = String
+type Var = String
 -- Fix point funvtion for the while loops
 
 fix :: (a -> a) -> a
 fix f = let x = f x in x
 
 
--- Our Progs: 
+-- Our Progs:
 
 
 
@@ -106,11 +106,11 @@ euclid = (["a","b"], Block [a,b,loop])
 
 -- Desugar :: Expr -> Expr
 
--- [(Name, Int)] :: Store
+-- [(Var, Int)] :: Store
 
 -- lookup :: [(a,b)] -> a -> Maybe b
--- get n env :: Name -> Store -> Int
--- set n i env :: Name -> Int -> Env -> Env
+-- get n env :: Var -> Store -> Int
+-- set n i env :: Var -> Int -> Env -> Env
 
 -- Semantic Domain:
 
@@ -118,15 +118,15 @@ euclid = (["a","b"], Block [a,b,loop])
 -- | Semantics of integer expressions.
 --   Semantic domain: Store -> Int
 
-get :: Name -> Store -> Int
+get :: Var -> Store -> Int
 get n env = case lookup n env of
             Just i -> i
             Nothing -> 0
 
 
 
-set :: Name -> Int -> Store -> Store
-set n i env = (n,i):env 
+set :: Var -> Int -> Store -> Store
+set n i env = (n,i):env
 
 new :: [Var] -> Store
 new v = map (\x -> (x,0)) v
