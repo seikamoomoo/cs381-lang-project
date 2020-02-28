@@ -1,6 +1,6 @@
 -- Project 2020
 -- PALINDROME
--- Team MKembers : Sriram Rakshith Kolar, Swetha Jayapath, Seika Mahmud 
+-- Team MKembers : Sriram Rakshith Kolar, Swetha Jayapath, Seika Muhmod 
 -- DESC: 
 
 
@@ -8,7 +8,7 @@
 -- Syntax
 --     int  ::= (any integer)
 --
---     var  ::= (any variable name)
+--     var  ::= (any variable Var)
 --
 --     expr ::= int                      literal integers
 --           |  `-` expr                 integer negation
@@ -37,13 +37,14 @@
 
 -- Grammer:
 
--- | Variable names.
+-- | Variable Vars.
 type Var = String
 
 -- | Integer expressions.
 data Expr = Lit Int
           | Neg Expr
           | Add Expr Expr
+          | Mul Expr Expr
           | Ref Var
   deriving (Eq,Show)
 
@@ -58,17 +59,29 @@ data Stmt = Set   Var  Expr
           | Cond  Test Stmt Stmt
           | While Test Stmt
           | Block [Stmt]
+          | For Stmt Test Stmt Stmt
   deriving (Eq,Show)
 
 -- | Program.
 type Prog = ([Var], Stmt)
+
+-- | Store 
+type Store = [(Var, Int)]
+
+
+
+--type Var = String
+-- Fix point funvtion for the while loops
+
+fix :: (a -> a) -> a
+fix f = let x = f x in x
 
 
 -- Our Progs: 
 
 
 
--- | An example Imp program.
+-- | An Imp program.
 euclid :: Prog
 euclid = (["a","b"], Block [a,b,loop])
   where
@@ -82,6 +95,7 @@ euclid = (["a","b"], Block [a,b,loop])
                (Set "b" (Add (Ref "b") (Neg (Ref "a"))))
                (Set "a" (Add (Ref "a") (Neg (Ref "b")))))
 
+fact :: 
 
 
 
@@ -90,21 +104,48 @@ euclid = (["a","b"], Block [a,b,loop])
 
 
 
+-- factorial(while)
+-- adding 3 numbers together
+-- 
 
 
 
 
 
+-- for (i = 0, i< 10 i= i + 1)
+-- while (i < 10)
+-- i = i +1
 
+-- Desugar :: Expr -> Expr
 
+-- [(Var, Int)] :: Store
 
-
+-- lookup :: [(a,b)] -> a -> Maybe b
+-- get n env :: Var -> Store -> Int
+-- set n i env :: Var -> Int -> Env -> Env
 
 -- Semantic Domain:
 
 
 -- | Semantics of integer expressions.
 --   Semantic domain: Store -> Int
+factorial :: Int -> Int
+factorial 0 = 1
+factorial n = n * factorial (n - 1)
+
+
+get :: Var -> Store -> Int
+get n env = case lookup n env of
+            Just i -> i
+            Nothing -> 0
+
+set :: Var -> Int -> Store -> Store
+set n i env = (n,i):env 
+
+new :: [Var] -> Store
+new v = map (\x -> (x,0)) v
+
+
 expr :: Expr -> Store -> Int
 expr (Lit i)   = \_ -> i
 expr (Neg e)   = \m -> negate (expr e m)
