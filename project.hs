@@ -1,5 +1,4 @@
 -- Project 2020
--- PALINDROME
 -- Team MKembers : Sriram Rakshith Kolar, Swetha Jayapath, Seika Muhmod 
 -- DESC: 
 
@@ -33,7 +32,10 @@
 --
 --     prog ::= `vars` var* `;` stmt     program
 
-
+-- Arrays are the core, strings cant be core.
+-- return an error instead of 0
+-- justification in the design doc !
+-- 
 
 -- Grammer:
 
@@ -46,6 +48,10 @@ data Expr = Lit Int
           | Add Expr Expr
           | Mul Expr Expr
           | Ref Var
+          | S String
+          | Cat Expr Expr
+          | L List
+                    
   deriving (Eq,Show)
 
 -- | Boolean expressions.
@@ -54,12 +60,24 @@ data Test = LTE Expr Expr
           | And Test Test
   deriving (Eq,Show)
 
+-- | Lists
+data List = Nil
+           | Cons Expr List
+  deriving (Eq,Show)
+
+
+-- | Strings
+-- data Str = S String
+--          | Cat Str Str
+--   deriving (Eq,Show)
+
 -- | Statements.
 data Stmt = Set   Var  Expr
           | Cond  Test Stmt Stmt
           | While Test Stmt
           | Block [Stmt]
           | For Stmt Test Stmt Stmt
+          
   deriving (Eq,Show)
 
 -- | Program.
@@ -68,7 +86,9 @@ type Prog = ([Var], Stmt)
 -- | Store 
 type Store = [(Var, Int)]
 
+type Fact = [Expr]
 
+type ListInt = [List]
 
 --type Var = String
 -- Fix point funvtion for the while loops
@@ -82,6 +102,8 @@ fix f = let x = f x in x
 
 
 -- | An Imp program.
+
+
 euclid :: Prog
 euclid = (["a","b"], Block [a,b,loop])
   where
@@ -95,11 +117,46 @@ euclid = (["a","b"], Block [a,b,loop])
                (Set "b" (Add (Ref "b") (Neg (Ref "a"))))
                (Set "a" (Add (Ref "a") (Neg (Ref "b")))))
 
-fact :: 
+
+
+-- A factorial program which checks the lesser factorial value and sets b to zero
+fact :: Prog
+fact = (["a","b"], Block [a,b,cond])
+   where 
+     a = Set "a" (Lit (factorial 6))
+     b = Set "b" (Lit (factorial 5))
+     cond = While
+          (LTE (Ref "a") (Ref "b"))
+          (Set "b" (Lit 0))
+
+
+-- concatination of list of Strings
+
+concatVar :: Prog
+concatVar = (["a","b"], Block [a,b,cond])
+    where
+      a = Set "a" (S "abcd")
+      b = Set "b" (S "efgh")
+      cond = While
+           (LTE (Lit 3)(Lit 4))
+           (Set "b" (S (str (Cat (Ref "a")(Ref "b")))))
+ 
+
+-- concatination of List of Integers
+
+concatInt :: Prog
+concatInt = (["a","b"], Block [a,b,cond])
+    where 
+      a = Set "a" (L (Cons (Lit 5)(Cons (Lit 6)(Cons (Lit 7) Nil))))
+      b = Set "b" (L (Cons (Lit 9)(Cons (Lit 10)(Cons (Lit 11) Nil))))
+      cond = While 
+            (LTE (Lit 3)(Lit 4))
+            (Set "b" (L(conInts (Ref "a")(Ref "b"))))
 
 
 
 
+-- If then or else 
 
 
 
@@ -126,9 +183,17 @@ fact ::
 
 -- Semantic Domain:
 
-
 -- | Semantics of integer expressions.
 --   Semantic domain: Store -> Int
+
+-- | List
+conInts :: Expr -> Expr -> List
+conInts (L (Cons i x)) (L y) = case x of
+                         Nil -> (Cons i y)
+                         otherwise -> (Cons i (conInts (L x) (L y)))
+
+
+
 factorial :: Int -> Int
 factorial 0 = 1
 factorial n = n * factorial (n - 1)
@@ -144,6 +209,12 @@ set n i env = (n,i):env
 
 new :: [Var] -> Store
 new v = map (\x -> (x,0)) v
+
+-- | Semantics of strings
+str :: Expr -> String
+str (S x) = x
+str (Cat x y) = case (Cat x y) of
+                (Cat (S n) (S m)) -> (n ++ m)
 
 
 expr :: Expr -> Store -> Int

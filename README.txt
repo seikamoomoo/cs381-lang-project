@@ -18,3 +18,4 @@ Instructions to Run teh program:
 								- fact
 								- concatVar
 								- concatInt
+	The values are harcoded for now. A different Implementation of the porograms will be submitted during the final submission. 
