@@ -1,6 +1,6 @@
 -- Project 2020
--- Team MKembers : Sriram Rakshith Kolar, Swetha Jayapath, Seika Muhmod 
--- DESC: 
+-- Team MKembers : Sriram Rakshith Kolar, Swetha Jayapathy, Seika Mahmud
+-- DESC:
 
 
 
@@ -35,9 +35,9 @@
 -- Arrays are the core, strings cant be core.
 -- return an error instead of 0
 -- justification in the design doc !
--- 
+--
 
--- Grammer:
+-- Grammar:
 
 -- | Variable Vars.
 type Var = String
@@ -51,7 +51,7 @@ data Expr = Lit Int
           | S String
           | Cat Expr Expr
           | L List
-                    
+
   deriving (Eq,Show)
 
 -- | Boolean expressions.
@@ -67,24 +67,19 @@ data List = Nil
   deriving (Eq,Show)
 
 
--- | Strings
--- data Str = S String
---          | Cat Str Str
---   deriving (Eq,Show)
-
--- | Statements.
+-- | Statements
 data Stmt = Set   Var  Expr
           | Cond  Test Stmt Stmt
           | While Test Stmt
           | Block [Stmt]
           | For Stmt Test Stmt Stmt
-          
+
   deriving (Eq,Show)
 
--- | Program.
+-- | Program
 type Prog = ([Var], Stmt)
 
--- | Store 
+-- | Store
 type Store = [(Var, Int)]
 
 type Fact = [Expr]
@@ -98,12 +93,41 @@ fix :: (a -> a) -> a
 fix f = let x = f x in x
 
 
--- Our Progs: 
+-- Our Progs:
+
+-- concatenation of strings in a list
+-- take list and length of list, final string in variable c
+
+popList :: Expr -> Expr
+popList (L Nil) = S ""
+popList (L (Cons e l)) = e
+
+restOfList :: Expr -> Expr
+restOfList (L Nil) = L Nil
+restOfList (L (Cons e l)) = L l
+
+concatVar :: Expr -> Expr -> Prog
+concatVar l i = (["a","b","c"], Block [a,b,c,cond])
+    where
+      a = Set "a" l
+      b = Set "b" (Lit 0)
+      c = Set "c" (S "")
+      cond = While
+           (LTE (Ref "b")(i))
+           (Block [(Set "c" (S (str (Cat (Ref "c")(popList (Ref "a")))))),(Set "a" (restOfList(Ref "a"))),(Set "b" (Add (Ref "b") (Lit 1)))])
 
 
+-- concatenation of two lists of integers
 
--- | An Imp program.
+concatInt :: Expr -> Expr -> Prog
+concatInt (L (Cons w x)) (L (Cons y z)) = (["a","b"], Block [a,b,cond])
+    where
+      a = Set "a" (L (Cons w x))
+      b = Set "b" (L (Cons y z))
+      cond = (Set "b" (L (conInts (Ref "a") (Ref "b"))))
 
+
+-- | Example programs:
 
 euclid :: Prog
 euclid = (["a","b"], Block [a,b,loop])
@@ -123,36 +147,12 @@ euclid = (["a","b"], Block [a,b,loop])
 -- A factorial program which checks the lesser factorial value and sets b to zero
 fact :: Prog
 fact = (["a","b"], Block [a,b,cond])
-   where 
+   where
      a = Set "a" (Lit (factorial 6))
      b = Set "b" (Lit (factorial 5))
      cond = While
           (LTE (Ref "a") (Ref "b"))
           (Set "b" (Lit 0))
-
-
--- concatination of list of Strings
-
-concatVar :: Prog
-concatVar = (["a","b"], Block [a,b,cond])
-    where
-      a = Set "a" (S "abcd")
-      b = Set "b" (S "efgh")
-      cond = While
-           (LTE (Lit 3)(Lit 4))
-           (Set "b" (S (str (Cat (Ref "a")(Ref "b")))))
- 
-
--- concatination of List of Integers
-
-concatInt :: Prog
-concatInt = (["a","b"], Block [a,b,cond])
-    where 
-      a = Set "a" (L (Cons (Lit 5)(Cons (Lit 6)(Cons (Lit 7) Nil))))
-      b = Set "b" (L (Cons (Lit 9)(Cons (Lit 10)(Cons (Lit 11) Nil))))
-      cond = While 
-            (LTE (Lit 3)(Lit 4))
-            (Set "b" (L(conInts (Ref "a")(Ref "b"))))
 
 
 badprog :: Prog
@@ -180,31 +180,11 @@ badprog3 = (["a","b"], Block [a,b,cond])
    where
     a = Set "a" (Lit 6)
     b = Set "b" (S "xyz")
-    cond = While 
+    cond = While
          (GTE (Lit 5)(Lit 6))
          (Set "c" (Mul (Ref "a")(Ref "b")))
 
 
-
-
-
-
--- If then or else 
-
-
-
-
--- factorial(while)
--- adding 3 numbers together
--- 
-
-
-
-
-
--- for (i = 0, i< 10 i= i + 1)
--- while (i < 10)
--- i = i +1
 
 -- Desugar :: Expr -> Expr
 
@@ -213,6 +193,7 @@ badprog3 = (["a","b"], Block [a,b,cond])
 -- lookup :: [(a,b)] -> a -> Maybe b
 -- get n env :: Var -> Store -> Int
 -- set n i env :: Var -> Int -> Env -> Env
+
 
 -- Semantic Domain:
 
@@ -238,7 +219,7 @@ get n env = case lookup n env of
             Nothing -> 0
 
 set :: Var -> Int -> Store -> Store
-set n i env = (n,i):env 
+set n i env = (n,i):env
 
 new :: [Var] -> Store
 new v = map (\x -> (x,0)) v
@@ -279,8 +260,7 @@ stmt (Block ss)    = \m -> stmts ss m  -- could also use foldl
 prog :: Prog -> Store
 prog (xs,s) = stmt s (new xs)
 
-
-
+-- | Type checking
 
 -- 1. Define the syntax of types
 data Type = TBool | TInt | TError | TString | TList
@@ -289,7 +269,6 @@ data Type = TBool | TInt | TError | TString | TList
 -- Define the typing relation.
 typeOfExp :: Expr -> Type
 typeOfExp (Lit i)    = TInt
---typeOf (Neg e)    =
 typeOfExp (Add l r)  = case (typeOfExp l, typeOfExp r) of
                           (TInt, TInt) -> TInt
                           _ -> TError
