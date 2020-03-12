@@ -58,6 +58,7 @@ data Expr = Lit Int
 data Test = LTE Expr Expr
           | Not Test
           | And Test Test
+          | GTE Expr Expr
   deriving (Eq,Show)
 
 -- | Lists
@@ -154,6 +155,38 @@ concatInt = (["a","b"], Block [a,b,cond])
             (Set "b" (L(conInts (Ref "a")(Ref "b"))))
 
 
+badprog :: Prog
+badprog = (["a","b","c"], Block [a,b,cond])
+   where
+    a = Set "a" (Lit 5)
+    b = Set "b" (S "efgh")
+    cond = While
+         (LTE (Lit 3)(Lit 4))
+         (Set "c" (Add (Ref "a") (Ref "b")))
+
+
+
+badprog2 :: Prog
+badprog2 = (["x","y","z"], Block [x,y,condition])
+   where
+    x = Set "x" (Lit 9)
+    y = Set "y" (S "rakshith")
+    condition = While
+              (GTE (Lit 5)(Lit 6))
+              (Set "y" (Cat (Ref "x")(Ref "y")))
+
+badprog3 :: Prog
+badprog3 = (["a","b"], Block [a,b,cond])
+   where
+    a = Set "a" (Lit 6)
+    b = Set "b" (S "xyz")
+    cond = While 
+         (GTE (Lit 5)(Lit 6))
+         (Set "c" (Mul (Ref "a")(Ref "b")))
+
+
+
+
 
 
 -- If then or else 
@@ -245,3 +278,55 @@ stmt (Block ss)    = \m -> stmts ss m  -- could also use foldl
 --   Semantic domain: Store
 prog :: Prog -> Store
 prog (xs,s) = stmt s (new xs)
+
+
+
+
+-- 1. Define the syntax of types
+data Type = TBool | TInt | TError | TString | TList
+  deriving (Eq,Show)
+
+-- Define the typing relation.
+typeOfExp :: Expr -> Type
+typeOfExp (Lit i)    = TInt
+--typeOf (Neg e)    =
+typeOfExp (Add l r)  = case (typeOfExp l, typeOfExp r) of
+                          (TInt, TInt) -> TInt
+                          _ -> TError
+typeOfExp (Mul l r)  = case (typeOfExp l, typeOfExp r) of
+                        (TInt, TInt) -> TInt
+                        _ -> TError
+typeOfExp (Ref s)  =   TString
+typeOfExp (S _)  =   TString
+typeOfExp (Cat l r)  =  case (typeOfExp l, typeOfExp r) of
+                          (TString, TString) -> TString
+                          _ -> TError
+typeOfExp (L xs)  =   TList
+
+
+typeOfTest :: Test -> Type
+typeOfTest (LTE l r)    = case (typeOfExp l, typeOfExp r) of
+                            (TInt, TInt) -> TBool
+                            _ -> TError
+typeOfTest (Not e) = case typeOfTest e of
+                      (TBool) -> TBool
+                      _ -> TError
+typeOfTest (And l r)    = case (typeOfTest l, typeOfTest r) of
+                          (TBool, TBool) -> TBool
+                          _ -> TError
+
+
+typeOfList :: List -> Type
+typeOfList (Nil)    = TList
+typeOfList (Cons e l)    = case (typeOfExp e, typeOfList l) of
+                            (TInt, TList) -> TList
+                            (TString, TList) -> TList
+                            _ -> TError
+
+typeOfStmt :: Stmt -> Type
+typeOfStmt (Cond c t e) = case (typeOfTest c, typeOfStmt t, typeOfStmt e) of
+                            (TBool, tt, te) -> if tt == te then tt else TError
+                            _ -> TError
+typeOfStmt (While c s) = case (typeOfTest c, typeOfStmt s) of
+                          (TBool, t) -> t
+                          _ -> TError
