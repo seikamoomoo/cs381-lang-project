@@ -1,7 +1,7 @@
 -- Project 2020
 -- PALINDROME
--- Team MKembers : Sriram Rakshith Kolar, Swetha Jayapath, Seika Mahmud 
--- DESC: 
+-- Team MKembers : Sriram Rakshith Kolar, Swetha Jayapath, Seika Mahmud
+-- DESC:
 
 
 
@@ -51,6 +51,8 @@ data Expr = Lit Int
 data Test = LTE Expr Expr
           | Not Test
           | And Test Test
+---adding for factorial
+          | Equ Expr Expr
   deriving (Eq,Show)
 
 -- | Statements.
@@ -60,12 +62,14 @@ data Stmt = Set   Var  Expr
           | Block [Stmt]
   deriving (Eq,Show)
 
+data Cmd = Define Macro Prog
+      deriving (Eq,Show)
+
 -- | Program.
 type Prog = ([Var], Stmt)
 
 
--- Our Progs: 
-
+-- Our Progs:
 
 
 -- | An example Imp program.
@@ -83,25 +87,7 @@ euclid = (["a","b"], Block [a,b,loop])
                (Set "a" (Add (Ref "a") (Neg (Ref "b")))))
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 -- Semantic Domain:
-
 
 -- | Semantics of integer expressions.
 --   Semantic domain: Store -> Int
@@ -133,3 +119,9 @@ stmt (Block ss)    = \m -> stmts ss m  -- could also use foldl
 --   Semantic domain: Store
 prog :: Prog -> Store
 prog (xs,s) = stmt s (new xs)
+
+
+qsort :: Ord a => [a] -> [a]
+qsort [] = []
+qsort (x:xs) = qsort (filter (<= x) xs)
+         ++ x : qsort (filter (> x) xs)
